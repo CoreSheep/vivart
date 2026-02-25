@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id // Clerk user ID
+  email     String    @unique
+  name      String?
+  imageUrl  String?
+  projects  Project[]
+  videos    Video[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  videos      Video[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@map("projects")
+}
+
+model Video {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId       String?
+  project         Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  // Source & Generation
+  sourceImageUrl  String   // Original artwork URL
+  sourceType      String   // "upload" | "generated"
+  prompt          String   @db.Text
+
+  // Output
+  videoUrl        String?  // Final video URL
+  thumbnailUrl    String?
+  duration        Int      // Seconds
+  resolution      String   // "720p" | "1080p" | "2k"
+
+  // Processing
+  status          String   // "pending" | "processing" | "completed" | "failed"
+  jobId           String?  @unique // Seedance job ID
+  errorMessage    String?  @db.Text
+
+  // Element Overlay
+  overlayElements Json?    // Custom elements added to video
+
+  // Metadata
+  metadata        Json?    // Additional parameters (artist name, style, etc.)
+  isPublic        Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("videos")
+}
