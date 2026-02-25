@@ -70,16 +70,6 @@ See [SETUP.md](SETUP.md) for detailed service setup instructions.
 - Tailwind CSS
 - Cloudflare R2 storage
 
-## Project Structure
-
-```
-src/
-├── app/              # Pages and API routes
-├── components/       # React components
-├── lib/              # Core services (API clients, database)
-└── types/            # TypeScript definitions
-```
-
 ## Development
 
 ```bash
@@ -88,15 +78,6 @@ npm run build         # Build for production
 npm run lint          # Run ESLint
 npm run type-check    # TypeScript check
 ```
-
-## Deployment
-
-Deploy to Vercel:
-
-1. Push to GitHub
-2. Import repository in Vercel
-3. Add environment variables
-4. Deploy
 
 ## License
 
