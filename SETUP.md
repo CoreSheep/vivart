@@ -1,218 +1,146 @@
-# Vivart Setup Guide
+# Setup Guide
 
-This guide will help you set up Vivart on your local machine step by step.
+Detailed instructions for setting up Vivart locally.
 
 ## Prerequisites
 
-Before you begin, make sure you have:
+- Node.js 20+
+- PostgreSQL 16+
+- Git
 
-- Node.js 20+ and npm 10+
-- A PostgreSQL database (local or cloud)
-- Git installed on your machine
-
-## Step 1: Clone and Install
+## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/vivart.git
+git clone https://github.com/CoreSheep/vivart.git
 cd vivart
-
-# Install dependencies
 npm install
 ```
 
-## Step 2: Set Up External Services
+## Service Configuration
 
-### 2.1 Clerk Authentication
+### 1. Clerk Authentication
 
-1. Go to [clerk.com](https://clerk.com/) and sign up
-2. Create a new application
-3. Copy your publishable and secret keys
-4. In Clerk dashboard:
-   - Enable email/password authentication
-   - Set up your sign-in/sign-up URLs
+1. Create account at [clerk.com](https://clerk.com)
+2. Create new application
+3. Copy API keys from dashboard
+4. Enable email/password authentication
 
-### 2.2 Database (Neon - Recommended)
+### 2. Database (Neon)
 
-1. Go to [neon.tech](https://neon.tech/) and sign up
-2. Create a new project
-3. Copy the connection string
-4. The connection string format: `postgresql://user:password@host/database?sslmode=require`
+1. Create project at [neon.tech](https://neon.tech)
+2. Copy connection string
+3. Format: `postgresql://user:password@host/database?sslmode=require`
 
-### 2.3 Cloudflare R2 Storage
+### 3. Cloudflare R2 Storage
 
-1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/)
-2. Navigate to R2
-3. Create a new bucket (e.g., "vivart")
-4. Generate API tokens:
-   - Go to R2 > Manage R2 API Tokens
-   - Create API token with "Object Read & Write" permissions
-5. Note your Account ID from the R2 overview page
-6. Make bucket public:
-   - Go to bucket settings
-   - Enable public access
-   - Note the public URL (format: `https://pub-xxxxx.r2.dev`)
+1. Navigate to R2 in [Cloudflare dashboard](https://dash.cloudflare.com)
+2. Create new bucket
+3. Generate API tokens with "Object Read & Write" permissions
+4. Enable public access for the bucket
+5. Note the public URL and Account ID
 
-### 2.4 Rita API (Seedance 2.0)
+### 4. Rita API (Seedance 2.0)
 
-1. Contact Rita or visit their website to get API access
-2. Once approved, you'll receive an API key
-3. Save this key for the environment variables
+Contact Rita to obtain API access for Seedance 2.0 video generation.
 
-### 2.5 Replicate API
+### 5. Replicate
 
-1. Go to [replicate.com](https://replicate.com/) and sign up
-2. Navigate to your account settings
-3. Copy your API token
+1. Sign up at [replicate.com](https://replicate.com)
+2. Copy API token from account settings
 
-## Step 3: Configure Environment Variables
+## Environment Setup
 
-Create a `.env.local` file in the root directory:
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local` and fill in all the values:
+Create `.env.local` file:
 
 ```env
-# Database (from Neon)
-DATABASE_URL="postgresql://user:password@ep-xxx-xxx.us-east-2.aws.neon.tech/vivart?sslmode=require"
-
-# Redis (optional - skip for MVP)
-# REDIS_URL="redis://localhost:6379"
-
-# AI Services
-RITA_API_KEY="your_rita_api_key_here"
-REPLICATE_API_TOKEN="r8_your_replicate_token_here"
-
-# Storage (from Cloudflare)
+DATABASE_URL="postgresql://..."
+RITA_API_KEY="your_key"
+REPLICATE_API_TOKEN="r8_..."
 R2_ACCOUNT_ID="your_account_id"
-R2_ACCESS_KEY_ID="your_access_key_id"
-R2_SECRET_ACCESS_KEY="your_secret_access_key"
+R2_ACCESS_KEY_ID="your_key"
+R2_SECRET_ACCESS_KEY="your_secret"
 R2_BUCKET_NAME="vivart"
 R2_PUBLIC_URL="https://pub-xxxxx.r2.dev"
-
-# Authentication (from Clerk)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_xxxxx"
-CLERK_SECRET_KEY="sk_test_xxxxx"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
 NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
 NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
-
-# Application
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-## Step 4: Set Up Database
-
-Run these commands to set up your database:
+## Database Setup
 
 ```bash
-# Generate Prisma Client
 npm run db:generate
-
-# Push schema to database
 npm run db:push
+```
 
-# (Optional) Open Prisma Studio to view your database
+Optional: Open Prisma Studio to view database
+```bash
 npm run db:studio
 ```
 
-## Step 5: Configure Clerk Webhooks
+## Configure Webhooks
 
-1. In your Clerk dashboard, go to Webhooks
-2. Add a new endpoint:
-   - URL: `http://localhost:3000/api/webhooks/clerk` (for local dev)
-   - For production: `https://yourdomain.com/api/webhooks/clerk`
-3. Select these events:
-   - `user.created`
-   - `user.updated`
-   - `user.deleted`
-4. Copy the webhook secret (you can add this as `CLERK_WEBHOOK_SECRET` in `.env.local`)
+### Clerk Webhook
 
-## Step 6: Run Development Server
+1. Go to Clerk dashboard > Webhooks
+2. Add endpoint: `http://localhost:3000/api/webhooks/clerk` (local) or your production URL
+3. Select events: `user.created`, `user.updated`, `user.deleted`
+4. Copy webhook secret (optional: add as `CLERK_WEBHOOK_SECRET`)
+
+## Run Application
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser!
+Open http://localhost:3000
 
-## Step 7: Test the Application
+## Verify Setup
 
-1. **Sign Up**: Create a new account
-2. **Upload Image**: Go to "Create Video" and upload an artwork
-3. **Generate Video**:
-   - Add a prompt like "gentle wind blowing through the scene"
-   - Click "Generate Video"
-   - Wait 1-2 minutes for the video to generate
-4. **View Gallery**: Check your generated videos in "My Videos"
+1. Create account
+2. Upload image in "Create Video"
+3. Generate video
+4. Check gallery for results
 
 ## Troubleshooting
 
-### Database Connection Issues
+**Database connection fails:**
+- Verify DATABASE_URL is correct
+- Check firewall rules for Neon
 
-- Make sure your DATABASE_URL is correct
-- Check if your database is accessible (firewall rules)
-- For Neon, ensure you have the `?sslmode=require` parameter
+**Image upload fails:**
+- Verify R2 credentials
+- Ensure bucket is public
 
-### Image Upload Fails
+**Video generation fails:**
+- Verify RITA_API_KEY
+- Check API quota/credits
 
-- Verify your R2 credentials are correct
-- Make sure the bucket exists and is public
-- Check R2 CORS settings if needed
-
-### Video Generation Doesn't Start
-
-- Verify your RITA_API_KEY is valid
-- Check the console for error messages
-- Make sure you have credits/quota with Rita
-
-### Clerk Authentication Not Working
-
-- Verify both publishable and secret keys are correct
-- Make sure sign-in/sign-up URLs match your configuration
-- Check Clerk dashboard for any error logs
-
-### Build Errors
-
+**Build errors:**
 ```bash
-# Clear Next.js cache
-rm -rf .next
-
-# Reinstall dependencies
-rm -rf node_modules
+rm -rf .next node_modules
 npm install
-
-# Try building again
 npm run build
 ```
 
-## Optional: Production Deployment
+## Production Deployment
 
-### Deploy to Vercel
+### Vercel Deployment
 
-1. Push your code to GitHub
-2. Go to [vercel.com](https://vercel.com/) and import your repository
+1. Push code to GitHub
+2. Import repository in Vercel
 3. Add all environment variables (use production values)
-4. Deploy!
+4. Deploy
 
-### Update Webhooks for Production
+### Update Webhooks
 
-Don't forget to update your Clerk webhook URL to your production domain!
-
-## Need Help?
-
-- Check the [main README](README.md) for more details
-- Open an issue on GitHub
-- Check the [Next.js documentation](https://nextjs.org/docs)
+Update Clerk webhook URL to production domain after deployment.
 
 ## Next Steps
 
-- Customize the landing page
+- Customize landing page
 - Add more artistic styles
-- Implement the element overlay feature
-- Add video sharing functionality
-- Set up monitoring and analytics
-
-Happy creating! 🎨✨
+- Configure monitoring
+- Setup analytics
